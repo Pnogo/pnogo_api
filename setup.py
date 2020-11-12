@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pnogo_api',
-    version='0.1.2',
+    version='0.2.0',
     url='api.pnogo.ml',
     license='',
     author='marc0777',
@@ -14,5 +14,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'flask',
+        'flask-cors',
     ],
 )
