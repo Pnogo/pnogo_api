@@ -1,0 +1,7 @@
+.idea
+build
+dist
+instance
+pnogo_api.egg-info
+venv
+__pycache__

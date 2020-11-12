@@ -1,0 +1,4 @@
+include pnogo_api/schema.sql
+graft pnogo_api/static
+graft pnogo_api/templates
+global-exclude *.pyc
