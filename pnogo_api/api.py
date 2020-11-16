@@ -3,7 +3,7 @@ from flask import (
 )
 
 from pnogo_api.auth import require_app_key
-from pnogo_api.db import query_db
+from pnogo_api.db import query_db, execute_db
 
 bp = Blueprint('api', __name__)
 
@@ -22,6 +22,24 @@ def getpnogo():
 def randompnogo():
     pongo = query_db(
         'SELECT id, description, points FROM ponghi WHERE id IN (SELECT id FROM ponghi ORDER BY RANDOM() LIMIT 1)')
+    return {
+        "id": pongo[0],
+        "description": pongo[1],
+        "points": pongo[2],
+    }
+
+
+@bp.route('/dailypnogo')
+@require_app_key
+def dailypnogo():
+    pnid = query_db("SELECT id FROM ponghi WHERE daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1")
+    if pnid is None:
+        pnid = query_db("SELECT id FROM ponghi WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
+        if pnid is None:
+            execute_db("UPDATE ponghi SET daily_date=null")
+            pnid = query_db("SELECT id FROM ponghi WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
+        execute_db("UPDATE ponghi SET daily_date=DATE('now') WHERE id = ?", pnid)
+    pongo = query_db("SELECT id, description, points FROM ponghi WHERE id=?", pnid)
     return {
         "id": pongo[0],
         "description": pongo[1],
