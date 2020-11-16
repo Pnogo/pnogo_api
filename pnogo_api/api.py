@@ -15,7 +15,7 @@ def getpnogo():
     pnid = request.args.get('id')
     pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
     return send_from_directory(current_app.config['PONGHI'], pongo[0],
-                               mimetype='image/jpeg') if pongo is not None else abort(404)
+                               mimetype='image/jpeg') if pongo else abort(404)
 
 
 @bp.route('/randompnogo')
@@ -27,7 +27,7 @@ def randompnogo():
         "id": pongo[0],
         "description": pongo[1],
         "points": pongo[2],
-    }
+    } if pongo else abort(404)
 
 
 @bp.route('/dailypnogo')
@@ -39,13 +39,16 @@ def dailypnogo():
         if pnid is None:
             execute_db("UPDATE ponghi SET daily_date=null")
             pnid = query_db("SELECT id FROM ponghi WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
+    if pnid is not None:
         execute_db("UPDATE ponghi SET daily_date=DATE('now') WHERE id = ?", pnid)
-    pongo = query_db("SELECT id, description, points FROM ponghi WHERE id=?", pnid)
-    return {
-        "id": pongo[0],
-        "description": pongo[1],
-        "points": pongo[2],
-    }
+        pongo = query_db("SELECT id, description, points FROM ponghi WHERE id=?", pnid)
+        return {
+            "id": pongo[0],
+            "description": pongo[1],
+            "points": pongo[2],
+        }
+    else:
+        abort(404)
 
 
 @bp.route('/update')
