@@ -19,9 +19,9 @@ def getpnogo():
                                mimetype='image/jpeg')
 
 
-@bp.route('/dailypnogo')
+@bp.route('/randompnogo')
 @require_app_key
-def dailypnogo():
+def randompnogo():
     pongo = query_db(
         'SELECT id, description, points FROM ponghi WHERE id IN (SELECT id FROM ponghi ORDER BY RANDOM() LIMIT 1)')
     return {
