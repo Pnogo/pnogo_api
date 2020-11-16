@@ -4,6 +4,7 @@ CREATE TABLE "ponghi" (
 	"description"	TEXT,
 	"points"	INTEGER DEFAULT 0,
 	"sent"	INTEGER DEFAULT 0,
+    "daily_date"	TEXT,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
