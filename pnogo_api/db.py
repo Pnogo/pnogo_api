@@ -45,6 +45,6 @@ def close_db(e=None):
 
 def query_db(query, args=(), multi=False):
     cur = get_db().execute(query, args)
-    rv = cur.fetchall()
+    res = cur.fetchone() if not multi else cur.fetchall()
     cur.close()
-    return (rv[0] if rv else None) if not multi else rv
+    return res or None
