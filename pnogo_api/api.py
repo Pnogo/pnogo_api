@@ -1,7 +1,5 @@
-import os
-
 from flask import (
-    Blueprint, request, send_from_directory, current_app
+    Blueprint, request, send_from_directory, current_app, abort
 )
 
 from pnogo_api.auth import require_app_key
@@ -13,10 +11,10 @@ bp = Blueprint('api', __name__)
 @bp.route('/getpnogo')
 @require_app_key
 def getpnogo():
-    id = request.args.get('id')
-    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [id])
-    return send_from_directory(os.path.join(current_app.instance_path, 'pnoghi'), pongo[0],
-                               mimetype='image/jpeg')
+    pnid = request.args.get('id')
+    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
+    return send_from_directory(current_app.config['PONGHI'], pongo[0],
+                               mimetype='image/jpeg') if pongo is not None else abort(404)
 
 
 @bp.route('/randompnogo')
