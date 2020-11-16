@@ -4,6 +4,7 @@ from flask import (
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
+from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
@@ -44,4 +45,14 @@ def dailypnogo():
         "id": pongo[0],
         "description": pongo[1],
         "points": pongo[2],
+    }
+
+
+@bp.route('/update')
+@require_app_key
+def update():
+    res = sync_pnogo()
+    return {
+        "added": res[0],
+        "removed": res[1],
     }
