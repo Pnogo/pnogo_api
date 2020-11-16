@@ -48,3 +48,12 @@ def query_db(query, args=(), multi=False):
     res = cur.fetchone() if not multi else cur.fetchall()
     cur.close()
     return res or None
+
+
+def execute_db(query, args=()):
+    db = get_db()
+    if type(args) is tuple:
+        db.execute(query, args)
+    else:
+        db.executemany(query, args)
+    db.commit()
