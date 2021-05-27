@@ -10,11 +10,27 @@ from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
+
+@bp.route('/infopnogo')
+@require_app_key
+def infopnogo():
+    pnid = request.args.get('id')
+    pongo = query_db('SELECT file, description, points, sent, daily_date FROM ponghi WHERE id = ?', [pnid])
+    return {
+        "file": pongo[0],
+        "description": pongo[1],
+        "points": pongo[2],
+        "sent": pongo[3],
+        "daily_date": pongo[4],
+    } if pongo else abort(404)
+
+
 @bp.route('/countpnogo')
 @require_app_key
 def countpnogo():
     res = query_db('SELECT count(*) FROM ponghi')
     return {"count": res[0]} if res else abort(404)
+
 
 @bp.route('/getpnogo')
 @require_app_key
