@@ -10,6 +10,14 @@ from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
+@bp.route('/descpnogo')
+@require_app_key
+def descpnogo():
+    id = request.args.get('id')
+    desc = request.args.get('description')
+    execute_db(f"UPDATE ponghi SET description = '{desc}' WHERE id = {id}")
+    return f"done! set desc of {id} to: {desc}"
+
 
 @bp.route('/infopnogo')
 @require_app_key
