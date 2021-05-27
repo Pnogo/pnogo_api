@@ -13,8 +13,8 @@ bp = Blueprint('api', __name__)
 @bp.route('/countpnogo')
 @require_app_key
 def countpnogo():
-    count = query_db('SELECT count(*) FROM ponghi')[0]
-    return str(count)
+    res = query_db('SELECT count(*) FROM ponghi')
+    return {"count": res[0]} if res else abort(404)
 
 @bp.route('/getpnogo')
 @require_app_key
