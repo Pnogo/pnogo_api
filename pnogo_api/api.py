@@ -49,7 +49,7 @@ def getpnogo():
     width = request.args.get('width')
     height = request.args.get('height')
     maxsize = request.args.get('maxsize') or 1280
-    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
+    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0]))
@@ -81,8 +81,8 @@ def getpnogo():
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
 
-        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', [pnid])
-        
+        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', (pnid,))
+
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
