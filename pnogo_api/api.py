@@ -80,6 +80,9 @@ def getpnogo():
         img_io = BytesIO()
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
+
+        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', [pnid])
+        
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
