@@ -1,7 +1,9 @@
 from flask import (
-    Blueprint, request, send_from_directory, current_app, abort
+    Blueprint, request, send_file, current_app, abort
 )
 from werkzeug.utils import secure_filename
+from PIL import Image
+from io import BytesIO
 import os
 
 from pnogo_api.auth import require_app_key
@@ -44,9 +46,43 @@ def countpnogo():
 @require_app_key
 def getpnogo():
     pnid = request.args.get('id')
+    width = request.args.get('width')
+    height = request.args.get('height')
+    maxsize = request.args.get('maxsize') or 1280
     pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
-    return send_from_directory(current_app.config['PONGHI'], pongo[0],
-                               mimetype='image/jpeg') if pongo else abort(404)
+
+    if pongo:
+        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0]))
+        overscale = True
+
+        if (width is None and height is None):
+            overscale = False
+            if img.size[0] > img.size[1]:
+                width = int(maxsize)
+            else:
+                height = int(maxsize)
+
+        if (height is None):
+            width = int(width)
+            percent = (int(width) / float(img.size[0]))
+            height = int((float(img.size[1]) * float(percent)))
+        elif (width is None):
+            height = int(height)
+            percent = (int(height) / float(img.size[1]))
+            width = int((float(img.size[0]) * float(percent)))
+        else:
+            width = int(width)
+            height = int(height)
+
+        if (overscale or img.size[0] > width or img.size[1] > height):
+            img = img.resize((width,height),Image.ANTIALIAS)
+
+        img_io = BytesIO()
+        img.save(img_io, 'JPEG', optimize=True, quality=85)
+        img_io.seek(0)
+        return send_file(img_io, mimetype='image/jpeg')
+    else:
+        return abort(404)
 
 
 @bp.route('/randompnogo')
