@@ -52,7 +52,7 @@ def getpnogo():
     pongo = query_db('SELECT file FROM ponghi WHERE id = ?', (pnid,))
 
     if pongo:
-        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0]))
+        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
         overscale = True
 
         if (width is None and height is None):
