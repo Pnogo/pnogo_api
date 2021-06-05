@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, request, send_file, current_app, abort
+    Blueprint, request, send_file, send_from_directory, current_app, abort
 )
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -95,6 +95,13 @@ def getpnogo():
     else:
         return abort(404)
 
+@bp.route('/getpnogoriginal')
+@require_app_key
+def getpnogoriginal():
+    pnid = request.args.get('id')
+    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
+    return send_from_directory(current_app.config['PONGHI'], pongo[0],
+                               mimetype='image/jpeg') if pongo else abort(404)
 
 @bp.route('/randompnogo')
 @require_app_key
