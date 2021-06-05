@@ -20,7 +20,6 @@ def descpnogo():
     execute_db(f"UPDATE ponghi SET description = '{desc}' WHERE id = {id}")
     return f"done! set desc of {id} to: {desc}"
 
-
 @bp.route('/infopnogo')
 @require_app_key
 def infopnogo():
@@ -34,13 +33,21 @@ def infopnogo():
         "daily_date": pongo[4],
     } if pongo else abort(404)
 
-
 @bp.route('/countpnogo')
 @require_app_key
 def countpnogo():
     res = query_db('SELECT count(*) FROM ponghi')
     return {"count": res[0]} if res else abort(404)
 
+@bp.route('/killpnogo')
+@require_app_key
+def killpnogo():
+    pnid = request.args.get('id')
+    res = query_db('SELECT * FROM ponghi WHERE id = ?',(pnid,))
+    if res:
+        morte = execute_db('DELETE FROM ponghi WHERE id = ?',(pnid,))
+        return 'success!<br>il pongo numero ' + pnid + ' è stato morto, pace all\'anima sua'
+    else: return abort(404)
 
 @bp.route('/getpnogo')
 @require_app_key
