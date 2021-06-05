@@ -43,10 +43,11 @@ def countpnogo():
 @require_app_key
 def killpnogo():
     pnid = request.args.get('id')
-    res = query_db('SELECT * FROM ponghi WHERE id = ?',(pnid,))
-    if res:
-        morte = execute_db('DELETE FROM ponghi WHERE id = ?',(pnid,))
-        return 'success!<br>il pongo numero ' + pnid + ' è stato morto, pace all\'anima sua'
+    morte = query_db('SELECT file FROM ponghi WHERE id = ?',(pnid,))
+    if morte:
+        execute_db('DELETE FROM ponghi WHERE id = ?',(pnid,))
+        os.remove(os.path.join(current_app.config['PONGHI'], morte[0]))
+        return 'success!<br>il pongo numero ' + pnid + ' è stato abbattuto, pace all\'anima sua'
     else: return abort(404)
 
 @bp.route('/getpnogo')
