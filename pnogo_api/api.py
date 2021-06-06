@@ -19,7 +19,7 @@ def getallpnoghi():
     pnogos = query_db('SELECT * FROM ponghi', multi=True)
     out = '{"pongos":['
     for t in pnogos:
-        out += '{"id":' + str(t[0]) + ',"file name":"' + str(t[1]) + '","desc":"' + str(t[2]) + '","pints":' + str(t[3]) + ',"invii":' + str(t[4]) + '},'
+        out += '{"id":' + str(t[0]) + ',"file":"' + str(t[1]) + '","desc":"' + str(t[2]) + '","points":' + str(t[3]) + ',"sent":' + str(t[4]) + '},'
     out = out[:-1] + ']}'
     dict = json.loads(out)
     return dict
