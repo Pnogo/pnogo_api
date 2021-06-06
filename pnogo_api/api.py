@@ -17,16 +17,17 @@ bp = Blueprint('api', __name__)
 @bp.route('/getallpnoghi')
 @require_app_key
 def getallpnoghi():
-    pnogos = query_db('SELECT file, description, points, sent, daily_date FROM ponghi', multi=True)
+    pnogos = query_db('SELECT id, file, description, points, sent, daily_date FROM ponghi', multi=True)
     out = []
 
     for t in pnogos:
         pnog = {
-            "file": t[0],
-            "description": t[1],
-            "points": t[2],
-            "sent": t[3],
-            "daily_date": t[4],
+            "id": t[0],
+            "file": t[1],
+            "description": t[2],
+            "points": t[3],
+            "sent": t[4],
+            "daily_date": t[5],
         }
         out.append(pnog)
 
