@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pnogo_api',
-    version='0.8.3',
+    version='0.8.4',
     url='api.pnogo.ml',
     license='',
     author='marc0777',
