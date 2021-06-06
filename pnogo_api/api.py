@@ -6,6 +6,7 @@ from PIL import Image
 from io import BytesIO
 import os
 import json
+import random
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
@@ -94,6 +95,32 @@ def getpnogo():
         else:
             width = int(width)
             height = int(height)
+
+        if (overscale or img.size[0] > width or img.size[1] > height):
+            img = img.resize((width,height),Image.ANTIALIAS)
+
+        img_io = BytesIO()
+        img.save(img_io, 'JPEG', optimize=True, quality=85)
+        img_io.seek(0)
+
+        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', (pnid,))
+
+        return send_file(img_io, mimetype='image/jpeg')
+    else:
+        return abort(404)
+
+@bp.route('/getstretchedpnogo')
+@require_app_key
+def getstretchedpnogo():
+    pnid = request.args.get('id')
+    maxsize = request.args.get('maxsize') or 1920
+    width = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
+    height = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
+    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', (pnid,))
+
+    if pongo:
+        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        overscale = True
 
         if (overscale or img.size[0] > width or img.size[1] > height):
             img = img.resize((width,height),Image.ANTIALIAS)
