@@ -5,12 +5,25 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from io import BytesIO
 import os
+import json
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
 from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
+
+@bp.route('/getallpnoghi')
+@require_app_key
+def getallpnoghi():
+    pnogos = query_db('SELECT * FROM ponghi', multi=True)
+    out = '{"pongos":['
+    for t in pnogos:
+        out += '{"id":' + str(t[0]) + ',"file name":"' + str(t[1]) + '","desc":"' + str(t[2]) + '","pints":' + str(t[3]) + ',"invii":' + str(t[4]) + '},'
+    out = out[:-1] + ']}'
+    dict = json.loads(out)
+    return dict
+
 
 @bp.route('/descpnogo')
 @require_app_key
