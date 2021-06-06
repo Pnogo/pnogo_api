@@ -16,7 +16,7 @@ The same can be done on Windows by opening the included `install.bat` file.
 
 To start the API we need to first define some environment variables used by Flask. By setting the `FLASK_ENV` variable to `development` we enable some very useful functionalities, such as auto refresh on save (so we don't need to reopen Flask every time we edit the code) and the included debugger.
 
-This can be done in Windows using `set`, while on linux `export` must be used. For example, in Windows:
+This can be done in Windows using `set`, while on linacs `export` must be used. For example, in Windows:
 
 ```shell
 set FLASK_APP=run
