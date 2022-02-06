@@ -1,10 +1,17 @@
-CREATE TABLE "ponghi" (
+CREATE TABLE "pictures" (
 	"id"	INTEGER,
 	"file"	TEXT NOT NULL,
 	"description"	TEXT,
 	"points"	INTEGER DEFAULT 0,
 	"sent"	INTEGER DEFAULT 0,
     "daily_date"	TEXT,
+	"cndr_id"	INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+CREATE TABLE "cndr" (
+	"id"	INTEGER,
+	"name"	TEXT,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 

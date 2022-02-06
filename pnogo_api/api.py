@@ -7,6 +7,7 @@ from io import BytesIO
 import os
 import json
 import random
+from markupsafe import escape
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
@@ -14,27 +15,42 @@ from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
+@bp.route('/getall')
+@require_app_key
+def getall_all():
+    pnogos = query_db('SELECT p.id, p.file, p.description, p.points, p.sent, p.daily_date, c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id', multi=True)
+    keys = ['id', 'file', 'description', 'points', 'sent', 'daily_date', 'name']
+    out = [dict(zip(keys, pong)) for pong in pnogos] if pnogos else []
+    return json.dumps(out)
+
+@bp.route('/getall/<cndr>')
+@require_app_key
+def getall(cndr):
+    pnogos = query_db('SELECT p.id, p.file, p.description, p.points, p.sent, p.daily_date FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE c.name LIKE ?', [escape(cndr)], multi=True)
+    keys = ['id', 'file', 'description', 'points', 'sent', 'daily_date']
+    out = [dict(zip(keys, pong)) for pong in pnogos] if pnogos else []
+    return json.dumps(out)
+
 @bp.route('/getallpnoghi')
 @require_app_key
 def getallpnoghi():
-    pnogos = query_db('SELECT id, file, description, points, sent, daily_date FROM ponghi', multi=True)
-    keys = ['id', 'file', 'description', 'points', 'sent', 'daily_date']
-    out = [dict(zip(keys, pong)) for pong in pnogos]
-    return json.dumps(out)
+    return getall('pongo')
 
+@bp.route('/desc')
 @bp.route('/descpnogo')
 @require_app_key
 def descpnogo():
     id = request.args.get('id')
     desc = request.args.get('description')
-    execute_db(f"UPDATE ponghi SET description = '{desc}' WHERE id = {id}")
+    execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {id}")
     return f"done! set desc of {id} to: {desc}"
 
+@bp.route('/info')
 @bp.route('/infopnogo')
 @require_app_key
 def infopnogo():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT file, description, points, sent, daily_date FROM ponghi WHERE id = ?', [pnid])
+    pongo = query_db('SELECT file, description, points, sent, daily_date FROM pictures WHERE id = ?', [pnid])
     return {
         "file": pongo[0],
         "description": pongo[1],
@@ -43,23 +59,37 @@ def infopnogo():
         "daily_date": pongo[4],
     } if pongo else abort(404)
 
+
+@bp.route('/count')
+@require_app_key
+def count_all():
+    res = query_db('SELECT count(*) FROM pictures')
+    return {"count": res[0]} if res else abort(404)
+
+@bp.route('/count/<cndr>')
+@require_app_key
+def count(cndr):
+    res = query_db('SELECT count(*) FROM pictures JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ?', [escape(cndr)])
+    return {"count": res[0]} if res else abort(404)
+
 @bp.route('/countpnogo')
 @require_app_key
 def countpnogo():
-    res = query_db('SELECT count(*) FROM ponghi')
-    return {"count": res[0]} if res else abort(404)
+    return count('pongo')
 
+@bp.route('/kill')
 @bp.route('/killpnogo')
 @require_app_key
 def killpnogo():
     pnid = request.args.get('id')
-    morte = query_db('SELECT file FROM ponghi WHERE id = ?',(pnid,))
+    morte = query_db('SELECT file FROM pictures WHERE id = ?',(pnid,))
     if morte:
-        execute_db('DELETE FROM ponghi WHERE id = ?',(pnid,))
+        execute_db('DELETE FROM pictures WHERE id = ?',(pnid,))
         os.remove(os.path.join(current_app.config['PONGHI'], morte[0]))
         return 'success!<br>il pongo numero ' + pnid + ' è stato abbattuto, pace all\'anima sua'
     else: return abort(404)
 
+@bp.route('/get')
 @bp.route('/getpnogo')
 @require_app_key
 def getpnogo():
@@ -67,7 +97,7 @@ def getpnogo():
     width = request.args.get('width')
     height = request.args.get('height')
     maxsize = request.args.get('maxsize') or 1280
-    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', (pnid,))
+    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
@@ -99,12 +129,13 @@ def getpnogo():
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
 
-        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', (pnid,))
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
 
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
 
+@bp.route('/getstretched')
 @bp.route('/getstretchedpnogo')
 @require_app_key
 def getstretchedpnogo():
@@ -112,7 +143,7 @@ def getstretchedpnogo():
     maxsize = request.args.get('maxsize') or 1920
     width = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
     height = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
-    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', (pnid,))
+    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
@@ -123,44 +154,50 @@ def getstretchedpnogo():
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
 
-        execute_db('UPDATE ponghi SET sent = sent + 1 WHERE id = ?', (pnid,))
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
 
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
 
+@bp.route('/getoriginal')
 @bp.route('/getpnogoriginal')
 @require_app_key
 def getpnogoriginal():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT file FROM ponghi WHERE id = ?', [pnid])
+    pongo = query_db('SELECT file FROM pictures WHERE id = ?', [pnid])
     return send_from_directory(current_app.config['PONGHI'], pongo[0],
                                mimetype='image/jpeg') if pongo else abort(404)
 
-@bp.route('/randompnogo')
+@bp.route('/random/<cndr>')
 @require_app_key
-def randompnogo():
+def random(cndr):
     pongo = query_db(
-        'SELECT id, description, points FROM ponghi WHERE id IN (SELECT id FROM ponghi ORDER BY RANDOM() LIMIT 1)')
+        'SELECT id, description, points FROM pictures WHERE id IN (SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? ORDER BY RANDOM() LIMIT 1)', [escape(cndr)])
     return {
         "id": pongo[0],
         "description": pongo[1],
         "points": pongo[2],
     } if pongo else abort(404)
 
-
-@bp.route('/dailypnogo')
+@bp.route('/randompnogo')
 @require_app_key
-def dailypnogo():
-    pnid = query_db("SELECT id FROM ponghi WHERE daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1")
+def randompnogo():
+    return random('pongo')
+
+
+@bp.route('/daily/<cndr>')
+@require_app_key
+def daily(cndr):
+    pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
     if pnid is None:
-        pnid = query_db("SELECT id FROM ponghi WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
+        pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date is null ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
         if pnid is None:
-            execute_db("UPDATE ponghi SET daily_date=null")
-            pnid = query_db("SELECT id FROM ponghi WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
+            execute_db("UPDATE pictures SET daily_date=null WHERE cndr_id=(SELECT id FROM cndr WHERE name LIKE ?)", (escape(cndr),))
+            pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date is null ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
     if pnid is not None:
-        execute_db("UPDATE ponghi SET daily_date=DATE('now') WHERE id = ?", pnid)
-        pongo = query_db("SELECT id, description, points FROM ponghi WHERE id=?", pnid)
+        execute_db("UPDATE pictures SET daily_date=DATE('now') WHERE id = ?", pnid)
+        pongo = query_db("SELECT id, description, points FROM pictures WHERE id=?", pnid)
         return {
             "id": pongo[0],
             "description": pongo[1],
@@ -168,6 +205,11 @@ def dailypnogo():
         }
     else:
         abort(404)
+
+@bp.route('/dailypnogo')
+@require_app_key
+def dailypnogo():
+    return daily('pongo')
 
 
 @bp.route('/update')

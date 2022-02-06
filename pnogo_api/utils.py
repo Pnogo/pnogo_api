@@ -14,11 +14,11 @@ def sync_pnogo():
 
 def sync_db():
     folp = set(zip(os.listdir(current_app.config['PONGHI'])))
-    dbp = set(query_db('SELECT file FROM ponghi', multi=True) or [])
+    dbp = set(query_db('SELECT file FROM pictures', multi=True) or [])
     add = folp - dbp
     rem = dbp - folp
 
-    execute_db('INSERT INTO ponghi (file) VALUES (?)', add)
-    execute_db('DELETE FROM ponghi WHERE file=?', rem)
+    execute_db('INSERT INTO pictures (file) VALUES (?)', add)
+    execute_db('DELETE FROM pictures WHERE file=?', rem)
 
     return len(add), len(rem)
