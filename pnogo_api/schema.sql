@@ -4,7 +4,7 @@ CREATE TABLE "pictures" (
 	"description"	TEXT,
 	"points"	INTEGER DEFAULT 0,
 	"sent"	INTEGER DEFAULT 0,
-    "daily_date"	TEXT,
+	"daily_date"	TEXT,
 	"cndr_id"	INTEGER NOT NULL DEFAULT 1,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
