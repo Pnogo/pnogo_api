@@ -47,7 +47,7 @@ def descpnogo():
     pnid = request.args.get('id')
     desc = request.args.get('description')
     execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {pnid}")
-    return f"done! set desc of {id} to: {desc}"
+    return f"done! set desc of {pnid} to: {desc}"
 
 
 @bp.route('/info')
