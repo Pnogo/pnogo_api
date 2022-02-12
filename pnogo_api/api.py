@@ -46,7 +46,7 @@ def getallpnoghi():
 def descpnogo():
     pnid = request.args.get('id')
     desc = request.args.get('description')
-    execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {pnid}")
+    execute_db('UPDATE pictures SET description = ? WHERE id = ?', (desc, pnid,))
     return f"done! set desc of {pnid} to: {desc}"
 
 
