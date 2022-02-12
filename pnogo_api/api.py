@@ -245,28 +245,43 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@bp.route('/addpnogo', methods=['GET', 'POST'])
+@bp.route('/add/<cndr>', methods=['GET', 'POST'])
 @require_app_key
-def addpnogo():
+def add(cndr):
     if request.method == 'POST':
         # check if the post request has the file part
         if 'picture' not in request.files:
-            return 'morte: no file'
+            return 'morte: no parameter'
         file = request.files['picture']
         # if user does not select file, browser also
         # submit an empty part without filename
-        if file.filename == '':
-            return 'morte: no file name'
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config['PONGHI'], filename))
-            return 'done!'
-    return '''
+        if file is None or file.filename == '':
+            return 'morte: no file'
+        filename = secure_filename(file.filename)
+        if not allowed_file(filename):
+            return 'morte: file type not allowed'
+        pnid = query_db('SELECT id FROM pictures WHERE file = ?', [filename])
+        if pnid is not None:
+            return f'morte: {filename} already present in db with id {pnid[0]}'
+        cndr_id = query_db('SELECT id FROM cndr WHERE name LIKE ?', [escape(cndr)])
+        if cndr_id is None:
+            return f'morte: {escape(cndr)} non è presente nel db'
+        file.save(os.path.join(current_app.config['PONGHI'], filename))
+        execute_db('INSERT INTO pictures (file, cndr_id) VALUES (?,?)', (filename, cndr_id[0]))
+        return 'done!'
+
+    return f'''
     <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
+    <title>Upload new {cndr}</title>
+    <h1>Upload new {cndr}</h1>
     <form method=post enctype=multipart/form-data>
       <input type=file name=picture>
       <input type=submit value=Upload>
     </form>
     '''
+
+
+@bp.route('/addpnogo', methods=['GET', 'POST'])
+@require_app_key
+def addpnogo():
+    return add('pongo')
