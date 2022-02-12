@@ -228,7 +228,7 @@ def dailypnogo():
 
 @bp.route('/update')
 @require_app_key
-def update(): # function now useless!
+def update():  # function now useless!
     return {
         "added": 0,
         "removed": 0,
