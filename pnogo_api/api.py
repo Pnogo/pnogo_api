@@ -11,7 +11,6 @@ from markupsafe import escape
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
-from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
@@ -229,11 +228,10 @@ def dailypnogo():
 
 @bp.route('/update')
 @require_app_key
-def update():
-    res = sync_pnogo()
+def update(): # function now useless!
     return {
-        "added": res[0],
-        "removed": res[1],
+        "added": 0,
+        "removed": 0,
     }
 
 
