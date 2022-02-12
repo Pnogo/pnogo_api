@@ -44,9 +44,9 @@ def getallpnoghi():
 @bp.route('/descpnogo')
 @require_app_key
 def descpnogo():
-    id = request.args.get('id')
+    pnid = request.args.get('id')
     desc = request.args.get('description')
-    execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {id}")
+    execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {pnid}")
     return f"done! set desc of {id} to: {desc}"
 
 
