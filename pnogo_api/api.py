@@ -15,6 +15,7 @@ from pnogo_api.utils import sync_pnogo
 
 bp = Blueprint('api', __name__)
 
+
 @bp.route('/getall')
 @require_app_key
 def getall_all():
@@ -22,6 +23,7 @@ def getall_all():
     keys = ['id', 'file', 'description', 'points', 'sent', 'daily_date', 'name']
     out = [dict(zip(keys, pong)) for pong in pnogos] if pnogos else []
     return json.dumps(out)
+
 
 @bp.route('/getall/<cndr>')
 @require_app_key
@@ -31,10 +33,12 @@ def getall(cndr):
     out = [dict(zip(keys, pong)) for pong in pnogos] if pnogos else []
     return json.dumps(out)
 
+
 @bp.route('/getallpnoghi')
 @require_app_key
 def getallpnoghi():
     return getall('pongo')
+
 
 @bp.route('/desc')
 @bp.route('/descpnogo')
@@ -44,6 +48,7 @@ def descpnogo():
     desc = request.args.get('description')
     execute_db(f"UPDATE pictures SET description = '{desc}' WHERE id = {id}")
     return f"done! set desc of {id} to: {desc}"
+
 
 @bp.route('/info')
 @bp.route('/infopnogo')
@@ -66,28 +71,33 @@ def count_all():
     res = query_db('SELECT count(*) FROM pictures')
     return {"count": res[0]} if res else abort(404)
 
+
 @bp.route('/count/<cndr>')
 @require_app_key
 def count(cndr):
     res = query_db('SELECT count(*) FROM pictures JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ?', [escape(cndr)])
     return {"count": res[0]} if res else abort(404)
 
+
 @bp.route('/countpnogo')
 @require_app_key
 def countpnogo():
     return count('pongo')
+
 
 @bp.route('/kill')
 @bp.route('/killpnogo')
 @require_app_key
 def killpnogo():
     pnid = request.args.get('id')
-    morte = query_db('SELECT file FROM pictures WHERE id = ?',(pnid,))
+    morte = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
     if morte:
-        execute_db('DELETE FROM pictures WHERE id = ?',(pnid,))
+        execute_db('DELETE FROM pictures WHERE id = ?', (pnid,))
         os.remove(os.path.join(current_app.config['PONGHI'], morte[0]))
         return 'success!<br>il pongo numero ' + pnid + ' è stato abbattuto, pace all\'anima sua'
-    else: return abort(404)
+    else:
+        return abort(404)
+
 
 @bp.route('/get')
 @bp.route('/getpnogo')
@@ -103,18 +113,18 @@ def getpnogo():
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
         overscale = True
 
-        if (width is None and height is None):
+        if width is None and height is None:
             overscale = False
             if img.size[0] > img.size[1]:
                 width = int(maxsize)
             else:
                 height = int(maxsize)
 
-        if (height is None):
+        if height is None:
             width = int(width)
             percent = (int(width) / float(img.size[0]))
             height = int((float(img.size[1]) * float(percent)))
-        elif (width is None):
+        elif width is None:
             height = int(height)
             percent = (int(height) / float(img.size[1]))
             width = int((float(img.size[0]) * float(percent)))
@@ -122,8 +132,8 @@ def getpnogo():
             width = int(width)
             height = int(height)
 
-        if (overscale or img.size[0] > width or img.size[1] > height):
-            img = img.resize((width,height),Image.ANTIALIAS)
+        if overscale or img.size[0] > width or img.size[1] > height:
+            img = img.resize((width, height), Image.ANTIALIAS)
 
         img_io = BytesIO()
         img.save(img_io, 'JPEG', optimize=True, quality=85)
@@ -134,6 +144,7 @@ def getpnogo():
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
+
 
 @bp.route('/getstretched')
 @bp.route('/getstretchedpnogo')
@@ -141,14 +152,14 @@ def getpnogo():
 def getstretchedpnogo():
     pnid = request.args.get('id')
     maxsize = request.args.get('maxsize') or 1920
-    width = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
-    height = int(random.uniform(0.1,1) * random.uniform(0,2) * int(maxsize))
+    width = int(random.uniform(0.1, 1) * random.uniform(0, 2) * int(maxsize))
+    height = int(random.uniform(0.1, 1) * random.uniform(0, 2) * int(maxsize))
     pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
 
-        img = img.resize((width,height),Image.ANTIALIAS)
+        img = img.resize((width, height), Image.ANTIALIAS)
 
         img_io = BytesIO()
         img.save(img_io, 'JPEG', optimize=True, quality=85)
@@ -159,6 +170,7 @@ def getstretchedpnogo():
         return send_file(img_io, mimetype='image/jpeg')
     else:
         return abort(404)
+
 
 @bp.route('/getoriginal')
 @bp.route('/getpnogoriginal')
@@ -168,6 +180,7 @@ def getpnogoriginal():
     pongo = query_db('SELECT file FROM pictures WHERE id = ?', [pnid])
     return send_from_directory(current_app.config['PONGHI'], pongo[0],
                                mimetype='image/jpeg') if pongo else abort(404)
+
 
 @bp.route('/random/<cndr>')
 @require_app_key
@@ -179,6 +192,7 @@ def random(cndr):
         "description": pongo[1],
         "points": pongo[2],
     } if pongo else abort(404)
+
 
 @bp.route('/randompnogo')
 @require_app_key
@@ -206,6 +220,7 @@ def daily(cndr):
     else:
         abort(404)
 
+
 @bp.route('/dailypnogo')
 @require_app_key
 def dailypnogo():
@@ -221,11 +236,14 @@ def update():
         "removed": res[1],
     }
 
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @bp.route('/addpnogo', methods=['GET', 'POST'])
 @require_app_key
