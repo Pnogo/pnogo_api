@@ -283,3 +283,27 @@ def add(cndr):
 @require_app_key
 def addpnogo():
     return add('pongo')
+
+
+@bp.route('/create')
+@require_app_key
+def create():
+    name = escape(request.args.get('name'))
+    cndr_id = query_db('SELECT id FROM cndr WHERE name LIKE ?', (name,))
+    if cndr_id:
+        return f'morte: {name} already present in db with id {cndr_id[0]}'
+
+    execute_db('INSERT INTO cndr (name) VALUES (?)', (name,))
+    return 'done'
+
+
+@bp.route('/remove')
+@require_app_key
+def remove():
+    name = escape(request.args.get('name'))
+    cnt = query_db('SELECT COUNT(p.id) FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ?', (name,))
+    if cnt[0] > 0:
+        return f'morte: some pictures of {name} are still in the db'
+
+    execute_db('DELETE FROM cndr WHERE name=?', (name,))
+    return 'done'
