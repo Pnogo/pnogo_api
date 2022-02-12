@@ -16,5 +16,8 @@ setup(
         'flask',
         'flask-cors',
         'Pillow',
+        'setuptools',
+        'Werkzeug',
+        'MarkupSafe',
     ],
 )
