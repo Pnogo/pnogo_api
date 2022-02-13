@@ -185,11 +185,12 @@ def getpnogoriginal():
 @require_app_key
 def random_all():
     pongo = query_db(
-        'SELECT id, description, points FROM pictures WHERE id IN (SELECT id FROM pictures ORDER BY RANDOM() LIMIT 1)')
+        'SELECT p.id, p.description, p.points, c.name FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE p.id IN (SELECT id FROM pictures ORDER BY RANDOM() LIMIT 1)')
     return {
         "id": pongo[0],
         "description": pongo[1],
         "points": pongo[2],
+        "name": pongo[3],
     } if pongo else abort(404)
 
 
