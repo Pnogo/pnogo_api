@@ -211,32 +211,27 @@ def random(cndr):
 def randompnogo():
     return random('pongo')
 
-
-@bp.route('/daily/<cndr>')
+@bp.route('/dailypnogo')
+@bp.route('/daily')
 @require_app_key
-def daily(cndr):
-    pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
+def daily():
+    pnid = query_db("SELECT id FROM pictures WHERE daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1")
     if pnid is None:
-        pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date is null ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
+        pnid = query_db("SELECT id FROM pictures WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
         if pnid is None:
-            execute_db("UPDATE pictures SET daily_date=null WHERE cndr_id=(SELECT id FROM cndr WHERE name LIKE ?)", (escape(cndr),))
-            pnid = query_db("SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? AND daily_date is null ORDER BY RANDOM() LIMIT 1", [escape(cndr)])
+            execute_db("UPDATE pictures SET daily_date=null")
+            pnid = query_db("SELECT id FROM pictures WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
     if pnid is not None:
         execute_db("UPDATE pictures SET daily_date=DATE('now') WHERE id = ?", pnid)
-        pongo = query_db("SELECT id, description, points FROM pictures WHERE id=?", pnid)
+        pongo = query_db("SELECT p.id, p.description, p.points, c.name FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE p.id=?", pnid)
         return {
             "id": pongo[0],
             "description": pongo[1],
             "points": pongo[2],
+            "name": pongo[3],
         }
     else:
         abort(404)
-
-
-@bp.route('/dailypnogo')
-@require_app_key
-def dailypnogo():
-    return daily('pongo')
 
 
 @bp.route('/update')
