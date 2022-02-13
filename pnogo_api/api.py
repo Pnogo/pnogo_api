@@ -307,3 +307,11 @@ def remove():
 
     execute_db('DELETE FROM cndr WHERE name=?', (name,))
     return 'done'
+
+
+@bp.route('/version')
+@require_app_key
+def version():
+    import pkg_resources
+    vrs = pkg_resources.require("pnogo_api")[0].version
+    return {'version': vrs}
