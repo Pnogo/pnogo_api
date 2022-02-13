@@ -181,6 +181,18 @@ def getpnogoriginal():
                                mimetype='image/jpeg') if pongo else abort(404)
 
 
+@bp.route('/random')
+@require_app_key
+def random_all():
+    pongo = query_db(
+        'SELECT id, description, points FROM pictures WHERE id IN (SELECT id FROM pictures ORDER BY RANDOM() LIMIT 1)')
+    return {
+        "id": pongo[0],
+        "description": pongo[1],
+        "points": pongo[2],
+    } if pongo else abort(404)
+
+
 @bp.route('/random/<cndr>')
 @require_app_key
 def random(cndr):
