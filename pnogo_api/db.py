@@ -36,8 +36,12 @@ def query_db(query, args=(), multi=False):
 
 def execute_db(query, args=()):
     db = get_db()
-    if type(args) is tuple:
-        db.execute(query, args)
-    else:
-        db.executemany(query, args)
-    db.commit()
+    try:
+        if type(args) is tuple:
+            db.execute(query, args)
+        else:
+            db.executemany(query, args)
+        db.commit()
+    except sqlite3.Error:
+        return False
+    return True
