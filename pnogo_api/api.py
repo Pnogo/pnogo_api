@@ -309,6 +309,15 @@ def remove():
     return 'done'
 
 
+@bp.route('/list')
+@require_app_key
+def listcndr():
+    cndrs = query_db('SELECT id, name FROM cndr', multi=True)
+    keys = ['id', 'name']
+    out = [dict(zip(keys, cndr)) for cndr in cndrs] if cndrs else []
+    return json.dumps(out)
+
+
 @bp.route('/version')
 @require_app_key
 def version():
