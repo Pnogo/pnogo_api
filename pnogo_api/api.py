@@ -196,7 +196,7 @@ def random_all():
 
 @bp.route('/random/<cndr>')
 @require_app_key
-def random(cndr):
+def random_cndr(cndr):
     pongo = query_db(
         'SELECT id, description, points FROM pictures WHERE id IN (SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? ORDER BY RANDOM() LIMIT 1)', [escape(cndr)])
     return {
@@ -209,7 +209,7 @@ def random(cndr):
 @bp.route('/randompnogo')
 @require_app_key
 def randompnogo():
-    return random('pongo')
+    return random_cndr('pongo')
 
 @bp.route('/dailypnogo')
 @bp.route('/daily')
