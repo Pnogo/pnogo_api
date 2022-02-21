@@ -151,8 +151,10 @@ def getpnogo():
 def getstretchedpnogo():
     pnid = request.args.get('id')
     maxsize = request.args.get('maxsize') or 1920
-    width = random.randrange(int(maxsize/20), maxsize)
-    height = random.randrange(int(maxsize/20), maxsize)
+    otherside = int(random.uniform(1/20, 1) * maxsize)
+    direc = random.random() < 0.5
+    width = otherside if direc else maxsize
+    height = maxsize if direc else otherside
     pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
 
     if pongo:
