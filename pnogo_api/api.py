@@ -301,12 +301,8 @@ def addpnogo():
 @require_app_key
 def create():
     name = escape(request.args.get('name'))
-    cndr_id = query_db('SELECT id FROM cndr WHERE name LIKE ?', (name,))
-    if cndr_id:
-        return f'morte: {name} already present in db with id {cndr_id[0]}'
-
-    execute_db('INSERT INTO cndr (name) VALUES (?)', (name,))
-    return 'done'
+    success = execute_db('INSERT INTO cndr (name) VALUES (?)', (name,))
+    return 'done' if success else f'morte: {name} already present in db'
 
 
 @bp.route('/remove')
