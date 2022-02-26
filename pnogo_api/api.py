@@ -54,13 +54,14 @@ def descpnogo():
 @require_app_key
 def infopnogo():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT file, description, points, sent, daily_date FROM pictures WHERE id = ?', [pnid])
+    pongo = query_db('SELECT p.file, p.description, p.points, p.sent, p.daily_date, c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE p.id = ?', [pnid])
     return {
         "file": pongo[0],
         "description": pongo[1],
         "points": pongo[2],
         "sent": pongo[3],
         "daily_date": pongo[4],
+        "name": pongo[5],
     } if pongo else abort(404)
 
 
