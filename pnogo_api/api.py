@@ -214,6 +214,7 @@ def random_cndr(cndr):
 def randompnogo():
     return random_cndr('pongo')
 
+
 @bp.route('/dailypnogo')
 @bp.route('/daily')
 @require_app_key
