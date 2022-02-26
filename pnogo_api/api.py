@@ -2,7 +2,7 @@ from flask import (
     Blueprint, request, send_file, send_from_directory, current_app, abort
 )
 from werkzeug.utils import secure_filename
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 import os
 import json
@@ -111,6 +111,7 @@ def getpnogo():
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        img = ImageOps.exif_transpose(img)
         overscale = True
 
         if width is None and height is None:
