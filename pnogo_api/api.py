@@ -174,6 +174,25 @@ def getstretchedpnogo():
     else:
         return abort(404)
 
+@bp.route('/getbitmap')
+@require_app_key
+def getbitmap():
+    pnid = request.args.get('id')
+    width = request.args.get('width') or 128
+    height = request.args.get('height') or 64
+    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
+
+    if pongo:
+        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        img = img.resize((width, height), Image.ANTIALIAS)
+        img = img.convert("1")
+        out = "".join("0x%02x," % b for b in img.tobytes())
+
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
+
+        return out
+    else:
+        return abort(404)
 
 @bp.route('/getoriginal')
 @bp.route('/getpnogoriginal')
