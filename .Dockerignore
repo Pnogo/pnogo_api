@@ -1,0 +1,6 @@
+venv
+build
+instance
+pnogo_api.egg-info
+dist
+.*
