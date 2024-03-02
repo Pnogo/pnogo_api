@@ -134,7 +134,7 @@ def getpnogo():
             height = int(height)
 
         if overscale or img.size[0] > width or img.size[1] > height:
-            img = img.resize((width, height), Image.ANTIALIAS)
+            img = img.resize((width, height), Image.LANCZOS)
 
         img_io = BytesIO()
         img.save(img_io, 'JPEG', optimize=True, quality=85)
@@ -162,7 +162,7 @@ def getstretchedpnogo():
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
 
-        img = img.resize((width, height), Image.ANTIALIAS)
+        img = img.resize((width, height), Image.LANCZOS)
 
         img_io = BytesIO()
         img.save(img_io, 'JPEG', optimize=True, quality=85)
@@ -184,7 +184,7 @@ def getbitmap():
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
-        img = img.resize((width, height), Image.ANTIALIAS)
+        img = img.resize((width, height), Image.LANCZOS)
         img = img.convert("1")
         out = "".join("0x%02x," % b for b in img.tobytes())
 
