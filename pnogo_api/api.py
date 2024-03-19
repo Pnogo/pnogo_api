@@ -45,7 +45,7 @@ def getallpnoghi():
 def descpnogo():
     pnid = request.args.get('id')
     desc = request.args.get('description')
-    execute_db('UPDATE pictures SET description = ? WHERE id = ?', (desc, pnid,))
+    execute_db('UPDATE pictures SET description = %s WHERE id = %s', (desc, pnid,))
     return f"done! set desc of {pnid} to: {desc}"
 
 
@@ -54,7 +54,7 @@ def descpnogo():
 @require_app_key
 def infopnogo():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT p.file, p.description, p.points, p.sent, CAST(p.daily_date AS TEXT), c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE p.id = ?', [pnid])
+    pongo = query_db('SELECT p.file, p.description, p.points, p.sent, CAST(p.daily_date AS TEXT), c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE p.id = %s', [pnid])
     return {
         "file": pongo[0],
         "description": pongo[1],
@@ -90,9 +90,9 @@ def countpnogo():
 @require_app_key
 def killpnogo():
     pnid = request.args.get('id')
-    morte = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
+    morte = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
     if morte:
-        execute_db('DELETE FROM pictures WHERE id = ?', (pnid,))
+        execute_db('DELETE FROM pictures WHERE id = %s', (pnid,))
         os.remove(os.path.join(current_app.config['PONGHI'], morte[0]))
         return 'success!<br>il pongo numero ' + pnid + ' è stato abbattuto, pace all\'anima sua'
     else:
