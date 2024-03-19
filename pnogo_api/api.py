@@ -152,7 +152,7 @@ def getpnogo():
 @require_app_key
 def getstretchedpnogo():
     pnid = request.args.get('id')
-    maxsize = request.args.get('maxsize') or 1920
+    maxsize = int(request.args.get('maxsize') or 1920)
     otherside = int(random.uniform(1/20, 1) * maxsize)
     direc = random.random() < 0.5
     width = otherside if direc else maxsize
