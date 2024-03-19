@@ -1,5 +1,5 @@
 import os
-import sqlite3
+import psycopg
 
 from flask import current_app, g
 
@@ -9,10 +9,10 @@ def init_app(app):
 
 
 def get_db():
-    dbpath = current_app.config['DATABASE']
+    pg_uri = current_app.config['DATABASE']
     if 'db' not in g:
-        create = not os.path.isfile(dbpath)
-        g.db = sqlite3.connect(dbpath, detect_types=sqlite3.PARSE_DECLTYPES)
+        create = 0 # todo reimplement creation
+        g.db = psycopg.connect(pg_uri)
         if create:
             with current_app.open_resource('schema.sql') as f:
                 g.db.executescript(f.read().decode('utf8'))
@@ -42,6 +42,6 @@ def execute_db(query, args=()):
         else:
             db.executemany(query, args)
         db.commit()
-    except sqlite3.Error:
+    except psycopg.Error:
         return False
     return True
