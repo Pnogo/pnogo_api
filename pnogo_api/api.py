@@ -27,7 +27,7 @@ def getall_all():
 @bp.route('/getall/<cndr>')
 @require_app_key
 def getall(cndr):
-    pnogos = query_db('SELECT p.id, p.file, p.description, p.points, p.sent, p.daily_date FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE c.name LIKE ?', [escape(cndr)], multi=True)
+    pnogos = query_db('SELECT p.id, p.file, p.description, p.points, p.sent, CAST(p.daily_date AS TEXT) FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE c.name LIKE %s', [escape(cndr)], multi=True)
     keys = ['id', 'file', 'description', 'points', 'sent', 'daily_date']
     out = [dict(zip(keys, pong)) for pong in pnogos] if pnogos else []
     return json.dumps(out)
@@ -54,7 +54,7 @@ def descpnogo():
 @require_app_key
 def infopnogo():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT p.file, p.description, p.points, p.sent, p.daily_date, c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE p.id = ?', [pnid])
+    pongo = query_db('SELECT p.file, p.description, p.points, p.sent, CAST(p.daily_date AS TEXT), c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id WHERE p.id = ?', [pnid])
     return {
         "file": pongo[0],
         "description": pongo[1],
@@ -75,7 +75,7 @@ def count_all():
 @bp.route('/count/<cndr>')
 @require_app_key
 def count(cndr):
-    res = query_db('SELECT count(*) FROM pictures JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ?', [escape(cndr)])
+    res = query_db('SELECT count(*) FROM pictures JOIN cndr c ON cndr_id=c.id WHERE c.name ILIKE %s', [escape(cndr)])
     return {"count": res[0]} if res else abort(404)
 
 
@@ -107,7 +107,7 @@ def getpnogo():
     width = request.args.get('width')
     height = request.args.get('height')
     maxsize = request.args.get('maxsize') or 1280
-    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
+    pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
@@ -140,7 +140,7 @@ def getpnogo():
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
 
-        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = %s', (pnid,))
 
         return send_file(img_io, mimetype='image/jpeg')
     else:
@@ -157,7 +157,7 @@ def getstretchedpnogo():
     direc = random.random() < 0.5
     width = otherside if direc else maxsize
     height = maxsize if direc else otherside
-    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
+    pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
@@ -168,7 +168,7 @@ def getstretchedpnogo():
         img.save(img_io, 'JPEG', optimize=True, quality=85)
         img_io.seek(0)
 
-        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = %s', (pnid,))
 
         return send_file(img_io, mimetype='image/jpeg')
     else:
@@ -180,7 +180,7 @@ def getbitmap():
     pnid = request.args.get('id')
     width = request.args.get('width') or 128
     height = request.args.get('height') or 64
-    pongo = query_db('SELECT file FROM pictures WHERE id = ?', (pnid,))
+    pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
         img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
@@ -188,7 +188,7 @@ def getbitmap():
         img = img.convert("1")
         out = "".join("0x%02x," % b for b in img.tobytes())
 
-        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = ?', (pnid,))
+        execute_db('UPDATE pictures SET sent = sent + 1 WHERE id = %s', (pnid,))
 
         return out
     else:
@@ -199,7 +199,7 @@ def getbitmap():
 @require_app_key
 def getpnogoriginal():
     pnid = request.args.get('id')
-    pongo = query_db('SELECT file FROM pictures WHERE id = ?', [pnid])
+    pongo = query_db('SELECT file FROM pictures WHERE id = %s', [pnid])
     return send_from_directory(current_app.config['PONGHI'], pongo[0],
                                mimetype='image/jpeg') if pongo else abort(404)
 
@@ -221,7 +221,7 @@ def random_all():
 @require_app_key
 def random_cndr(cndr):
     pongo = query_db(
-        'SELECT id, description, points FROM pictures WHERE id IN (SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ? ORDER BY RANDOM() LIMIT 1)', [escape(cndr)])
+        'SELECT id, description, points FROM pictures WHERE id IN (SELECT p.id FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name ILIKE %s ORDER BY RANDOM() LIMIT 1)', [escape(cndr)])
     return {
         "id": pongo[0],
         "description": pongo[1],
@@ -239,15 +239,15 @@ def randompnogo():
 @bp.route('/daily')
 @require_app_key
 def daily():
-    pnid = query_db("SELECT id FROM pictures WHERE daily_date=DATE('now') ORDER BY RANDOM() LIMIT 1")
+    pnid = query_db("SELECT id FROM pictures WHERE daily_date=now()::date ORDER BY RANDOM() LIMIT 1")
     if pnid is None:
         pnid = query_db("SELECT id FROM pictures WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
         if pnid is None:
             execute_db("UPDATE pictures SET daily_date=null")
             pnid = query_db("SELECT id FROM pictures WHERE daily_date is null ORDER BY RANDOM() LIMIT 1")
     if pnid is not None:
-        execute_db("UPDATE pictures SET daily_date=DATE('now') WHERE id = ?", pnid)
-        pongo = query_db("SELECT p.id, p.description, p.points, c.name FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE p.id=?", pnid)
+        execute_db("UPDATE pictures SET daily_date=now()::date WHERE id = %s", pnid)
+        pongo = query_db("SELECT p.id, p.description, p.points, c.name FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE p.id=%s", pnid)
         return {
             "id": pongo[0],
             "description": pongo[1],
@@ -290,14 +290,14 @@ def add(cndr):
         filename = secure_filename(file.filename)
         if not allowed_file(filename):
             return 'morte: file type not allowed'
-        pnid = query_db('SELECT id FROM pictures WHERE file = ?', [filename])
+        pnid = query_db('SELECT id FROM pictures WHERE file = %s', [filename])
         if pnid is not None:
             return f'morte: {filename} already present in db with id {pnid[0]}'
-        cndr_id = query_db('SELECT id FROM cndr WHERE name LIKE ?', [escape(cndr)])
+        cndr_id = query_db('SELECT id FROM cndr WHERE name ILIKE %s', [escape(cndr)])
         if cndr_id is None:
             return f'morte: {escape(cndr)} non è presente nel db'
         file.save(os.path.join(current_app.config['PONGHI'], filename))
-        execute_db('INSERT INTO pictures (file, cndr_id) VALUES (?,?)', (filename, cndr_id[0]))
+        execute_db('INSERT INTO pictures (file, cndr_id) VALUES (%s,%s)', (filename, cndr_id[0]))
         return 'done!'
 
     return f'''
@@ -321,7 +321,7 @@ def addpnogo():
 @require_app_key
 def create():
     name = escape(request.args.get('name'))
-    success = execute_db('INSERT INTO cndr (name) VALUES (?)', (name,))
+    success = execute_db('INSERT INTO cndr (name) VALUES (%s)', (name,))
     return 'done' if success else f'morte: {name} already present in db'
 
 
@@ -329,11 +329,11 @@ def create():
 @require_app_key
 def remove():
     name = escape(request.args.get('name'))
-    cnt = query_db('SELECT COUNT(p.id) FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name LIKE ?', (name,))
+    cnt = query_db('SELECT COUNT(p.id) FROM pictures p JOIN cndr c ON cndr_id=c.id WHERE c.name ILIKE %s', (name,))
     if cnt[0] > 0:
         return f'morte: some pictures of {name} are still in the db'
 
-    execute_db('DELETE FROM cndr WHERE name=?', (name,))
+    execute_db('DELETE FROM cndr WHERE name=%s', (name,))
     return 'done'
 
 

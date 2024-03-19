@@ -10,7 +10,7 @@ bp = Blueprint('auth', __name__)
 
 
 def match_api_keys(key):
-    out = query_db('select name from auth where key = ?', [key])
+    out = query_db('select name from auth where key = %s', [key])
     return out is not None
 
 
