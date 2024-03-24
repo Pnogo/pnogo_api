@@ -1,16 +1,16 @@
 from flask import (
-    Blueprint, request, send_file, send_from_directory, current_app, abort
+    Blueprint, request, send_file, abort
 )
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageOps
 from io import BytesIO
-import os
 import json
 import random
 from markupsafe import escape
 
 from pnogo_api.auth import require_app_key
 from pnogo_api.db import query_db, execute_db
+from pnogo_api.s3 import get_object, put_object, delete_object
 
 bp = Blueprint('api', __name__)
 
@@ -93,7 +93,7 @@ def killpnogo():
     morte = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
     if morte:
         execute_db('DELETE FROM pictures WHERE id = %s', (pnid,))
-        os.remove(os.path.join(current_app.config['PONGHI'], morte[0]))
+        delete_object(morte[0])
         return 'success!<br>il pongo numero ' + pnid + ' è stato abbattuto, pace all\'anima sua'
     else:
         return abort(404)
@@ -110,7 +110,7 @@ def getpnogo():
     pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
-        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        img = Image.open(get_object(pongo[0])).convert('RGB')
         img = ImageOps.exif_transpose(img)
         overscale = True
 
@@ -160,7 +160,7 @@ def getstretchedpnogo():
     pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
-        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        img = Image.open(get_object(pongo[0])).convert('RGB')
 
         img = img.resize((width, height), Image.LANCZOS)
 
@@ -183,7 +183,7 @@ def getbitmap():
     pongo = query_db('SELECT file FROM pictures WHERE id = %s', (pnid,))
 
     if pongo:
-        img = Image.open(os.path.join(current_app.config['PONGHI'], pongo[0])).convert('RGB')
+        img = Image.open(get_object(pongo[0])).convert('RGB')
         img = img.resize((width, height), Image.LANCZOS)
         img = img.convert("1")
         out = "".join("0x%02x," % b for b in img.tobytes())
@@ -200,8 +200,7 @@ def getbitmap():
 def getpnogoriginal():
     pnid = request.args.get('id')
     pongo = query_db('SELECT file FROM pictures WHERE id = %s', [pnid])
-    return send_from_directory(current_app.config['PONGHI'], pongo[0],
-                               mimetype='image/jpeg') if pongo else abort(404)
+    return send_file(get_object(pongo[0]), mimetype='image/jpeg') if pongo else abort(404)
 
 
 @bp.route('/random')
@@ -296,7 +295,7 @@ def add(cndr):
         cndr_id = query_db('SELECT id FROM cndr WHERE name ILIKE %s', [escape(cndr)])
         if cndr_id is None:
             return f'morte: {escape(cndr)} non è presente nel db'
-        file.save(os.path.join(current_app.config['PONGHI'], filename))
+        put_object(filename, file.stream)
         execute_db('INSERT INTO pictures (file, cndr_id) VALUES (%s,%s)', (filename, cndr_id[0]))
         return 'done!'
 

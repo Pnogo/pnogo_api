@@ -10,7 +10,10 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.getenv("DB_URI"),
-        PONGHI=os.path.join(app.instance_path, 'ponghi'),
+        S3_URL=os.getenv("S3_URL"),
+        S3_BUCKET=os.getenv("S3_BUCKET"),
+        S3_ACCESS=os.getenv("S3_ACCESS"),
+        S3_SECRET=os.getenv("S3_SECRET"),
     )
 
     if test_config is None:
