@@ -29,6 +29,10 @@ dependencies = [
     "werkzeug==3.0.1",
 ]
 
+[dependency-groups]
+dev = [
+    "ruff>=0.15",
+]
 
 [tool.ruff]
 line-length = 120
