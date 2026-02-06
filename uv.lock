@@ -271,27 +271,13 @@ wheels = [
 name = "pnogo-api"
 source = { virtual = "." }
 dependencies = [
-    { name = "argon2-cffi" },
-    { name = "argon2-cffi-bindings" },
-    { name = "blinker" },
-    { name = "certifi" },
-    { name = "cffi" },
-    { name = "click" },
-    { name = "colorama" },
     { name = "flask" },
     { name = "flask-cors" },
     { name = "itsdangerous" },
-    { name = "jinja2" },
     { name = "markupsafe" },
     { name = "minio" },
     { name = "pillow" },
-    { name = "psycopg" },
-    { name = "psycopg-binary" },
-    { name = "pycparser" },
-    { name = "pycryptodome" },
-    { name = "typing-extensions" },
-    { name = "tzdata" },
-    { name = "urllib3" },
+    { name = "psycopg", extra = ["binary"] },
     { name = "werkzeug" },
 ]
 
@@ -302,27 +288,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "argon2-cffi", specifier = "==23.1.0" },
-    { name = "argon2-cffi-bindings", specifier = "==21.2.0" },
-    { name = "blinker", specifier = "==1.7.0" },
-    { name = "certifi", specifier = "==2024.2.2" },
-    { name = "cffi", specifier = "==1.16.0" },
-    { name = "click", specifier = "==8.1.7" },
-    { name = "colorama", specifier = "==0.4.6" },
     { name = "flask", specifier = "==3.0.2" },
     { name = "flask-cors", specifier = "==4.0.0" },
     { name = "itsdangerous", specifier = "==2.1.2" },
-    { name = "jinja2", specifier = "==3.1.3" },
     { name = "markupsafe", specifier = "==2.1.5" },
     { name = "minio", specifier = "==7.2.5" },
     { name = "pillow", specifier = "==10.2.0" },
-    { name = "psycopg", specifier = "==3.1.18" },
-    { name = "psycopg-binary", specifier = "==3.1.18" },
-    { name = "pycparser", specifier = "==2.21" },
-    { name = "pycryptodome", specifier = "==3.20.0" },
-    { name = "typing-extensions", specifier = "==4.10.0" },
-    { name = "tzdata", specifier = "==2024.1" },
-    { name = "urllib3", specifier = "==2.2.1" },
+    { name = "psycopg", extras = ["binary"], specifier = "==3.1.18" },
     { name = "werkzeug", specifier = "==3.0.1" },
 ]
 
@@ -340,6 +312,11 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/31/4d/43deb2a892b95875672df8fb34fcbff1345214f96d94ff49206871576fc0/psycopg-3.1.18.tar.gz", hash = "sha256:31144d3fb4c17d78094d9e579826f047d4af1da6a10427d91dfcfb6ecdf6f12b", size = 145973, upload-time = "2024-02-04T21:09:44.364Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fc/ca/dff5452be0b31fab93808b1ff0047bebc08d1ac65939be104c98e081b069/psycopg-3.1.18-py3-none-any.whl", hash = "sha256:4d5a0a5a8590906daa58ebd5f3cfc34091377354a1acced269dd10faf55da60e", size = 178087, upload-time = "2024-02-04T21:06:52.605Z" },
+]
+
+[package.optional-dependencies]
+binary = [
+    { name = "psycopg-binary", marker = "implementation_name != 'pypy'" },
 ]
 
 [[package]]
