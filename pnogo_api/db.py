@@ -1,5 +1,4 @@
 import psycopg
-
 from flask import current_app, g
 
 
@@ -8,19 +7,19 @@ def init_app(app):
 
 
 def get_db():
-    pg_uri = current_app.config['DATABASE']
-    if 'db' not in g:
-        create = 0 # todo reimplement creation
+    pg_uri = current_app.config["DATABASE"]
+    if "db" not in g:
+        create = 0  # todo reimplement creation
         g.db = psycopg.connect(pg_uri)
         if create:
-            with current_app.open_resource('schema.sql') as f:
-                g.db.executescript(f.read().decode('utf8'))
+            with current_app.open_resource("schema.sql") as f:
+                g.db.executescript(f.read().decode("utf8"))
 
     return g.db
 
 
 def close_db(e=None):
-    db = g.pop('db', None)
+    db = g.pop("db", None)
 
     if db is not None:
         db.close()

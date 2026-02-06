@@ -1,23 +1,21 @@
 import functools
 
-from flask import (
-    Blueprint, request, abort
-)
+from flask import Blueprint, abort, request
 
 from pnogo_api.db import query_db
 
-bp = Blueprint('auth', __name__)
+bp = Blueprint("auth", __name__)
 
 
 def match_api_keys(key):
-    out = query_db('select name from auth where key = %s', [key])
+    out = query_db("select name from auth where key = %s", [key])
     return out is not None
 
 
 def require_app_key(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
-        if match_api_keys(request.args.get('key')):
+        if match_api_keys(request.args.get("key")):
             return f(*args, **kwargs)
         else:
             abort(401)
