@@ -4,35 +4,32 @@ Pnogo API
 
 ## Requirements
 
-To use the API you need to install the dependencies specified inside `requirements.txt`. You can quickly install them using PIP:
+This project uses [uv](https://github.com/astral-sh/uv) to handle dependencies. To install them in a virtual environment, simply run:
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
-
-The same can be done on Windows by opening the included `install.bat` file.
 
 ## Usage
 
-To start the API we need to first define some environment variables used by Flask. By setting the `FLASK_ENV` variable to `development` we enable some very useful functionalities, such as auto refresh on save (so we don't need to reopen Flask every time we edit the code) and the included debugger.
-
-This can be done in Windows using `set`, while on linacs `export` must be used. For example, in Windows:
-
-```shell
-set FLASK_APP=run
-set FLASK_ENV=development
-```
-
-Then, from the root of the project, we need to enter the directory `pnogo_api`, where the code is:
+To start the API run this command:
 
 ```bash
-cd pnogo_api
+uv run -m flask --app pnogo_api/run run --debug
 ```
 
-Finally, we can start serving the API using Flask by giving the following command:
+## Style
+
+This project uses [ruff](https://github.com/astral-sh/ruff) for code formatting, and it's installed in the virtual environment automatically. 
+
+To format your code, simply run:
 
 ```bash
-python -m flask run
+ruff format
 ```
 
-A `start.bat` has been included to ease development when using Windows.
+To run the linter for any errors or issues:
+
+```bash
+ruff check
+```
