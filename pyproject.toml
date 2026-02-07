@@ -1,0 +1,29 @@
+[project]
+name = "pnogo-api"
+dynamic = ["version"]
+description = "Pnogo API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flask==3.0.2",
+    "flask-cors==4.0.0",
+    "granian==2.7.0",
+    "itsdangerous==2.1.2",
+    "markupsafe==2.1.5",
+    "minio==7.2.5",
+    "pillow==10.2.0",
+    "psycopg[binary]==3.1.18",
+    "werkzeug==3.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
