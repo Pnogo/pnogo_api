@@ -22,9 +22,12 @@ FROM python:3.10-slim-bookworm
 COPY --from=builder --chown=app:app /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
+ENV DJANGO_SETTINGS_MODULE=pnogo.settings
 
 WORKDIR /app
 
-EXPOSE 8000
+RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
-CMD ["granian", "--interface", "wsgi", "--workers", "2", "--host", "0.0.0.0", "--port", "8080", "pnogo_api.run:app"]
+EXPOSE 8080
+
+CMD ["granian", "--interface", "wsgi", "--workers", "2", "--host", "0.0.0.0", "--port", "8080", "pnogo.wsgi:application"]

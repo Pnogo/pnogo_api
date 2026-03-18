@@ -5,3 +5,4 @@ instance
 pnogo_api.egg-info
 venv
 __pycache__
+staticfiles
