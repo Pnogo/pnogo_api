@@ -18,7 +18,7 @@ bp = Blueprint("api", __name__)
 @require_app_key
 def getall_all():
     pnogos = query_db(
-        "SELECT p.id, p.file, p.description, p.points, p.sent, p.daily_date, c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id",
+        "SELECT p.id, p.file, p.description, p.points, p.sent, CAST(p.daily_date AS TEXT), c.name FROM pictures p JOIN cndr c ON p.cndr_id=c.id",
         multi=True,
     )
     keys = ["id", "file", "description", "points", "sent", "daily_date", "name"]
